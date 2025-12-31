@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>calculator</title>
+    <link rel="stylesheet" href="cstyle.css">
+</head>
+<body>
+   <header class="header">
+        <a href="#"><img src="Screenshot 2025-12-31 163758.png" alt="Hydrolic Station"></a>
+    </header>
+    <section class="history">
+        <div><a href="#">main menu></a></div>
+        <div><p>calculator</p></div>
+    </section>
+
+    <main class="main">
+        <section>
+            <div class="mode-tabs">
+                <button class="mode-btn active" data-mode="derivative">Derivative</button>
+                <button class="mode-btn" data-mode="limit">Limit</button>
+                <button class="mode-btn" data-mode="integral">Integral</button>
+            </div>
+        </section>
+        <section>
+            <div class="input-section">
+                <label for="problem-input">Problem</label>
+                <textarea
+                    id="problem-input"
+                    rows="3"
+                ></textarea>
+            </div>
+            <button class="solve-btn" id="solve-btn">Solve</button>
+            <div id="error-msg" class="error-message"></div>
+        </section>
+        <section>
+            <div class="output-card" id="output-card" hidden>
+                <div class="output-section">
+                    <h3>Problem</h3>
+                    <div id="output-problem" class="output-text"></div>
+                </div>
+
+                <div class="output-section">
+                    <h3>Steps</h3>
+                    <ol id="output-steps" class="steps-list"></ol>
+                </div>
+
+                <div class="output-section">
+                    <h3>Final Answer</h3>
+                    <div id="output-answer" class="final-answer"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <section class="footer_h">
+            <div class="footers">Powerd by :<div>© Hydrolic Station</div></div>
+            <div class="footers">developed by Oussema selmi<div></div></div>
+        </section>
+    </footer>
+    <script src="script.js"></script>
+</body>
+</html>
