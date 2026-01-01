@@ -9,7 +9,7 @@ CORS(app)
 x = symbols("x")
 
 
-@app.route("calculator-jxmj7kw9r-ousema51s-projects.vercel.app/solve", methods=["POST"])
+@app.route("/solve", methods=["POST"])
 def solve():
     try:
         data = request.get_json()
