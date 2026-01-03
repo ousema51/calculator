@@ -4,24 +4,27 @@ from sympy import symbols, diff, limit, integrate, sympify
 from sympy.core.sympify import SympifyError
 
 app = Flask(__name__)
-CORS(app)
+
+# ✅ Allow ALL origins, ALL methods, ALL headers
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 x = symbols("x")
 
-
-@app.route("/solve", methods=["POST"])
+@app.route("/solve", methods=["POST", "OPTIONS"])
 def solve():
+    if request.method == "OPTIONS":
+        return "", 200  # ✅ THIS FIXES PREFLIGHT
+
     try:
-        data = request.get_json()
+        data = request.get_json(force=True)
 
         mode = data.get("mode")
         problem = data.get("problem")
         limit_point = data.get("limitPoint")
 
         if not problem or not mode:
-            return jsonify({"error": "Missing problem or mode"}), 400
+            return jsonify({"error": "Missing input"}), 400
 
-        # Convert string to sympy expression
         try:
             expr = sympify(problem)
         except SympifyError:
@@ -33,26 +36,22 @@ def solve():
 
         steps = []
 
-        # ---------------- DERIVATIVE ----------------
         if mode == "derivative":
-            steps.append("Apply derivative rules")
+            steps.append("Differentiate with respect to x")
             result = diff(expr, x)
 
-        # ---------------- LIMIT ----------------
         elif mode == "limit":
             if limit_point is None:
                 return jsonify({
                     "problem": problem,
                     "steps": [],
-                    "answer": "Please specify a limit point"
+                    "answer": "Limit point required"
                 })
-
-            steps.append(f"Compute the limit as x → {limit_point}")
+            steps.append(f"Compute limit as x → {limit_point}")
             result = limit(expr, x, limit_point)
 
-        # ---------------- INTEGRAL ----------------
         elif mode == "integral":
-            steps.append("Apply integration rules")
+            steps.append("Integrate with respect to x")
             result = integrate(expr, x)
 
         else:
@@ -68,5 +67,5 @@ def solve():
         return jsonify({
             "problem": "",
             "steps": [],
-            "answer": "Error solving problem"
-        })
+            "answer": "Backend error"
+        }), 500
