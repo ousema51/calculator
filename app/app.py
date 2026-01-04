@@ -1,52 +1,71 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from sympy import symbols, diff, limit, integrate, sympify
+from sympy.core.sympify import SympifyError
 
 app = Flask(__name__)
-CORS(app)
 
-@app.route("/solve", methods=["POST"])
+# ✅ Allow ALL origins, ALL methods, ALL headers
+CORS(app, resources={r"/*": {"origins": "*"}})
+
+x = symbols("x")
+
+@app.route("/solve", methods=["POST", "OPTIONS"])
 def solve():
-    data = request.json
+    if request.method == "OPTIONS":
+        return "", 200  # ✅ THIS FIXES PREFLIGHT
 
-    return jsonify({
-        "problem": data.get("problem"),
-        "steps": ["Backend received request successfully"],
-        "answer": "Test OK"
-    })
+    try:
+        data = request.get_json(force=True)
 
-if __name__ == "__main__":
-    app.run()
+        mode = data.get("mode")
+        problem = data.get("problem")
+        limit_point = data.get("limitPoint")
 
+        if not problem or not mode:
+            return jsonify({"error": "Missing input"}), 400
 
-        prompt = f"""
-Solve this math problem step by step.
+        try:
+            expr = sympify(problem)
+        except SympifyError:
+            return jsonify({
+                "problem": problem,
+                "steps": [],
+                "answer": "Invalid expression. Use * for multiplication (example: 3*x)"
+            })
 
-Mode: {mode}
-Problem: {problem}
-Limit point: {limit_point}
+        steps = []
 
-Return the result in this JSON format ONLY:
-{{
-  "problem": "...",
-  "steps": ["step 1", "step 2"],
-  "answer": "final answer"
-}}
-"""
+        if mode == "derivative":
+            steps.append("Differentiate with respect to x")
+            result = diff(expr, x)
 
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0
-        )
+        elif mode == "limit":
+            if limit_point is None:
+                return jsonify({
+                    "problem": problem,
+                    "steps": [],
+                    "answer": "Limit point required"
+                })
+            steps.append(f"Compute limit as x → {limit_point}")
+            result = limit(expr, x, limit_point)
 
-        content = response.choices[0].message.content
+        elif mode == "integral":
+            steps.append("Integrate with respect to x")
+            result = integrate(expr, x)
 
-        return jsonify(eval(content))
+        else:
+            return jsonify({"error": "Invalid mode"}), 400
+
+        return jsonify({
+            "problem": problem,
+            "steps": steps,
+            "answer": str(result)
+        })
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
-@app.route("/")
-def health():
-    return "Backend is running"
+        return jsonify({
+            "problem": "",
+            "steps": [],
+            "answer": "Backend error"
+        }), 500
