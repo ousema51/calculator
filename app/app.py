@@ -1,23 +1,22 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import os
-from openai import OpenAI
 
 app = Flask(__name__)
 CORS(app)
 
-client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 @app.route("/solve", methods=["POST"])
 def solve():
-    try:
-        data = request.get_json()
+    data = request.json
 
-        problem = data.get("problem", "").strip()
-        mode = data.get("mode", "derivative")
-        limit_point = data.get("limitPoint")
+    return jsonify({
+        "problem": data.get("problem"),
+        "steps": ["Backend received request successfully"],
+        "answer": "Test OK"
+    })
 
-        if not problem:
-            return jsonify({"error": "No problem provided"}), 400
+if __name__ == "__main__":
+    app.run()
+
 
         prompt = f"""
 Solve this math problem step by step.
