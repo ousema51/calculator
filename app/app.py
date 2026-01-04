@@ -6,8 +6,7 @@ from openai import OpenAI
 app = Flask(__name__)
 CORS(app)
 
-#client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
-api_key="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"
+client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 @app.route("/solve", methods=["POST"])
 def solve():
     try:
